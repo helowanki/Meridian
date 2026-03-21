@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProtonMac | Windows Games on macOS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f0f14;
+            --bg-panel: #1a1a24;
+            --bg-panel-light: #252533;
+            --accent-magenta: #d92dcd;
+            --accent-magenta-hover: #e845dc;
+            --accent-blue: #0066FF;
+            --text-main: #ffffff;
+            --text-muted: #8b8b9c;
+            --font-main: 'Inter', -apple-system, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Утилиты и Анимации */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Навигация */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 15, 20, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #fff, var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-img-placeholder {
+            width: 32px; height: 32px;
+            background: var(--accent-magenta);
+            border-radius: 8px;
+            display: inline-block;
+        }
+        .btn-github {
+            background: var(--text-main);
+            color: var(--bg-dark);
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .btn-github:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        /* Hero Секция */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+        .video-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -2;
+        }
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(15,15,20,0.6) 0%, rgba(15,15,20,0.95) 100%);
+            z-index: -1;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        .btn-primary {
+            background: var(--accent-magenta);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 20px rgba(217, 45, 205, 0.4);
+        }
+        .btn-primary:hover {
+            background: var(--accent-magenta-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(217, 45, 205, 0.6);
+        }
+
+        /* Демо-окно приложения */
+        .demo-section {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, rgba(15,15,20,1) 0%, #171721 100%);
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+        }
+        .mac-window {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--bg-panel);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            display: flex;
+            height: 600px;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        /* Sidebar Демо */
+        .sidebar {
+            width: 260px;
+            background: rgba(20, 20, 28, 0.8);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .window-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-left: 5px;
+        }
+        .control-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+        
+        .sidebar-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            font-weight: 600;
+        }
+        .bottle-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 5px;
+        }
+        .bottle-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .bottle-item.active {
+            background: var(--accent-blue);
+        }
+        .bottle-icon {
+            width: 30px; height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 16px;
+        }
+        .bottle-info h4 { font-size: 0.9rem; font-weight: 600; }
+        .bottle-info p { font-size: 0.7rem; color: rgba(255,255,255,0.6); }
+        .bottle-item.active .bottle-info p { color: rgba(255,255,255,0.8); }
+
+        /* Main Content Демо */
+        .main-view {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            background: #171722;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .app-title { font-weight: 600; font-size: 1.1rem; }
+        .top-icons { display: flex; gap: 15px; color: var(--text-muted); font-size: 1.2rem;}
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-panel-light);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .game-info-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .game-big-icon {
+            width: 70px; height: 70px;
+            background: #2a2a35;
+            border-radius: 16px;
+            font-size: 35px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .game-details h2 { font-size: 1.5rem; margin-bottom: 8px;}
+        .tags { display: flex; gap: 10px; }
+        .tag {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-run {
+            background: var(--accent-magenta);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-run:hover { background: var(--accent-magenta-hover); transform: scale(1.05);}
+        
+        .programs-box {
+            background: var(--bg-panel-light);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            border: 1px dashed rgba(255,255,255,0.1);
+            color: var(--text-muted);
+        }
+
+        /* Гриды контента (Особенности) */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 100px;
+        }
+        .feature-card {
+            background: var(--bg-panel);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-magenta);
+            box-shadow: 0 10px 30px rgba(217, 45, 205, 0.1);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .feature-card h3 { margin-bottom: 10px; }
+        .feature-card p { color: var(--text-muted); line-height: 1.6;}
+
+        /* Спецификации */
+        .specs-section {
+            max-width: 1000px;
+            margin: 0 auto 100px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .spec-box {
+            background: var(--bg-panel);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .spec-box h3 { margin-bottom: 20px; font-size: 1.5rem; color: var(--accent-magenta);}
+        .spec-box ul { list-style: none; }
+        .spec-box li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            display: flex; justify-content: space-between;
+        }
+        .spec-box li:last-child { border: none; }
+        .spec-box li span { color: var(--text-main); font-weight: 600;}
+
+        /* Футер */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            background: #0a0a0d;
+        }
+
+        @media (max-width: 768px) {
+            .specs-section { grid-template-columns: 1fr; }
+            .mac-window { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <span class="logo-img-placeholder"></span> ProtonMac
+        </div>
+        <a href="https://github.com/yourusername/ProtonMac/releases" class="btn-github">Download</a>
+    </nav>
+
+    <header class="hero">
+        <video class="video-bg" autoplay loop muted playsinline>
+            <source src="bg-video.mp4" type="video/mp4">
+        </video>
+        <div class="overlay"></div>
+        
+        <h1 class="reveal">Run Windows Games<br>On macOS.</h1>
+        <p class="reveal" style="transition-delay: 0.2s;">No compromises. No excuses. A compatibility layer translating DirectX calls into Apple's Metal API, rebuilt for Apple Silicon.</p>
+        <div class="reveal" style="transition-delay: 0.4s;">
+            <a href="https://github.com/yourusername/ProtonMac" class="btn-primary">
+                <span>⚡</span> View on GitHub
+            </a>
+        </div>
+    </header>
+
+    <section class="demo-section">
+        <h2 class="section-title reveal">The Experience</h2>
+        
+        <div class="mac-window reveal" style="transition-delay: 0.2s;">
+            <div class="sidebar">
+                <div class="window-controls">
+                    <div class="control-dot dot-red"></div>
+                    <div class="control-dot dot-yellow"></div>
+                    <div class="control-dot dot-green"></div>
+                </div>
+                
+                <div class="sidebar-title">Bottles</div>
+                
+                <div class="bottle-item active" onclick="changeGame('test', '💀', 'Windows 11')">
+                    <div class="bottle-icon">💀</div>
+                    <div class="bottle-info">
+                        <h4>test</h4>
+                        <p>Windows 11</p>
+                    </div>
+                </div>
+                
+                <div class="bottle-item" onclick="changeGame('CyberPunk', '🤖', 'Windows 10')">
+                    <div class="bottle-icon">🤖</div>
+                    <div class="bottle-info">
+                        <h4>CyberPunk</h4>
+                        <p>Windows 10</p>
+                    </div>
+                </div>
+
+                <div class="bottle-item" onclick="changeGame('Elden Ring', '🗡️', 'Windows 11')">
+                    <div class="bottle-icon">🗡️</div>
+                    <div class="bottle-info">
+                        <h4>Elden Ring</h4>
+                        <p>Windows 11</p>
+                    </div>
+                </div>
+                
+                <div style="flex-grow: 1;"></div>
+                <div style="color: var(--text-muted); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--accent-magenta);">+ New Bottle</span>
+                    <span>🟢 Wine Ready</span>
+                </div>
+            </div>
+
+            <div class="main-view">
+                <div class="top-bar">
+                    <div class="app-title" id="demo-top-title">test</div>
+                    <div class="top-icons">▶ ⚙ ☷</div>
+                </div>
+
+                <div class="game-header">
+                    <div class="game-info-wrapper">
+                        <div class="game-big-icon" id="demo-big-icon">💀</div>
+                        <div class="game-details">
+                            <h2 id="demo-game-title">test</h2>
+                            <div class="tags">
+                                <span class="tag" id="demo-os-tag">🖥 Windows 11</span>
+                                <span class="tag">🍎 D3DMetal</span>
+                                <span class="tag">⚡ MSync</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-run">▶ Run .exe</button>
+                </div>
+
+                <div style="margin-bottom: 20px; font-weight: 600;">Programs <span style="float:right; color: var(--accent-magenta); cursor:pointer;">+ Add</span></div>
+                
+                <div class="programs-box">
+                    <div style="font-size: 2rem; margin-bottom: 10px;">🗃️</div>
+                    <div>No programs pinned</div>
+                    <div style="font-size: 0.8rem; margin-top: 5px;">Click Add or drop an .exe here</div>
+                </div>
+                
+                <div style="margin-top: 30px; margin-bottom: 10px; font-weight: 600;">Runtime Components</div>
+                <div style="background: var(--bg-panel-light); border-radius: 12px; padding: 15px; border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; gap: 15px;">
+                    <div style="color: var(--accent-magenta); font-size: 1.5rem;">📚</div>
+                    <div>
+                        <div style="font-weight: 600;">Runtime libraries</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">There are no installed dependencies</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-grid">
+        <div class="feature-card reveal">
+            <div class="feature-icon">⚡</div>
+            <h3>Features</h3>
+            <p>DirectX to Metal translation layer, native Apple Silicon support (M1, M2, M3+), controller support, and low-level graphics optimizations.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay: 0.2s;">
+            <div class="feature-icon">🧪</div>
+            <h3>In Progress</h3>
+            <p>Metal-based Ray Tracing (M3+), HDR rendering, Game Mode integration, Spatial Audio improvements, and performance overlays.</p>
+        </div>
+        <div class="feature-card reveal" style="transition-delay: 0.4s;">
+            <div class="feature-icon">🎮</div>
+            <h3>Compatibility</h3>
+            <p>Some games work great. Some games barely launch. Some games will absolutely destroy your sanity. Welcome to the ride.</p>
+        </div>
+    </section>
+
+    <section class="specs-section">
+        <div class="spec-box reveal">
+            <h3>System Requirements</h3>
+            <ul>
+                <li>OS <span>macOS 26.0+</span></li>
+                <li>Architecture <span>Apple Silicon (M1+)</span></li>
+                <li>Recommended RAM <span>16 GB</span></li>
+                <li>Minimum RAM <span>8 GB (if you enjoy suffering)</span></li>
+            </ul>
+        </div>
+        <div class="spec-box reveal" style="transition-delay: 0.2s;">
+            <h3>Project Info</h3>
+            <ul>
+                <li>Status <span>Active Development</span></li>
+                <li>Platform <span>macOS</span></li>
+                <li>License <span>MIT</span></li>
+                <li>Core Tech <span>Wine / D3DMetal</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p>🔥 Because yes, gaming on Mac is finally a thing.</p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">ProtonMac © 2026. Built for Apple Silicon.</p>
+    </footer>
+
+    <script>
+        // Анимации при скролле
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal(); // Запуск при загрузке
+
+        // Логика интерактивного окна
+        function changeGame(title, icon, os) {
+            // Обновляем тексты
+            document.getElementById('demo-top-title').innerText = title;
+            document.getElementById('demo-game-title').innerText = title;
+            document.getElementById('demo-big-icon').innerText = icon;
+            document.getElementById('demo-os-tag').innerText = "🖥 " + os;
+
+            // Обновляем активный класс в сайдбаре
+            let bottles = document.querySelectorAll('.bottle-item');
+            bottles.forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
