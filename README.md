@@ -1,4 +1,4 @@
-# ProtonMac
+# Meridian
 
 ![Status](https://img.shields.io/badge/status-active_development-red)
 ![Platform](https://img.shields.io/badge/platform-macOS-black)
@@ -11,11 +11,7 @@
 
 ## 💀 What is this?
 
-ProtonMac is a compatibility layer that allows you to run Windows games on macOS by translating DirectX calls into Apple's Metal API.
-
-Inspired by Valve's Proton — rebuilt for Apple Silicon.
-
-Because yes, gaming on Mac is finally a thing.
+Meridian is a compatibility layer that allows you to run Windows games on macOS by translating DirectX calls into Apple's Metal API.
 
 ---
 
