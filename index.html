@@ -60,13 +60,7 @@ nav {
   display: flex; align-items: center; gap: 10px;
   font-size: 16px; font-weight: 600; letter-spacing: -0.3px;
 }
-.nav-logo-icon {
-  width: 28px; height: 28px;
-  background: linear-gradient(135deg, var(--accent), #818cf8);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-}
+.nav-logo-icon { display:flex; align-items:center; }
 .nav-tabs {
   display: flex; align-items: center; gap: 2px;
   background: rgba(255,255,255,0.05);
@@ -142,12 +136,7 @@ section { padding: 100px 32px; }
   background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.14), transparent 70%);
   pointer-events: none;
 }
-.hero-grain {
-  position: absolute; inset: 0; opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 200px;
-  pointer-events: none;
-}
+
 .hero-badge {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 6px 14px 6px 8px;
@@ -219,115 +208,7 @@ section { padding: 100px 32px; }
   font-size: 12.5px; color: var(--text-3);
   animation: fadeUp 0.8s 0.4s ease both;
 }
-.hero-mockup {
-  margin-top: 80px;
-  width: 100%; max-width: 900px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 60px 120px rgba(0,0,0,0.7), 0 0 0 1px var(--border);
-  animation: fadeUp 1s 0.5s ease both;
-  position: relative;
-}
-.mockup-titlebar {
-  height: 44px;
-  background: var(--bg3);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center;
-  padding: 0 16px; gap: 8px;
-}
-.mock-dot { width: 12px; height: 12px; border-radius: 50%; }
-.mockup-body {
-  display: grid; grid-template-columns: 230px 1fr 265px;
-  height: 460px;
-}
-.mock-sidebar {
-  background: rgba(255,255,255,0.02);
-  border-right: 1px solid var(--border);
-  padding: 20px 12px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.mock-home-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-}
-.mock-home-icon {
-  width: 32px; height: 32px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-  background: rgba(59,130,246,0.2);
-}
-.mock-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
-.mock-sub { font-size: 10px; color: rgba(255,255,255,0.32); }
-.mock-bottle-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 10px;
-  border-radius: 10px;
-}
 .mock-bottle-row:hover { background: rgba(255,255,255,0.04); }
-.mock-bottle-icon {
-  width: 36px; height: 36px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 700;
-}
-.mock-content {
-  padding: 32px 36px;
-  display: flex; flex-direction: column;
-  align-items: flex-start;
-}
-.mock-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
-  width: 100%;
-  margin-top: 24px;
-}
-.mock-app {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 8px;
-}
-.mock-app-icon {
-  width: 72px; height: 72px; border-radius: 18px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
-}
-.mock-app-label {
-  font-size: 11px; color: rgba(255,255,255,0.5);
-  text-align: center;
-}
-.mock-inspector {
-  background: rgba(255,255,255,0.025);
-  border-left: 1px solid var(--border);
-  padding: 20px 16px;
-  display: flex; flex-direction: column; gap: 0;
-}
-.mock-insp-title {
-  font-size: 11px; font-weight: 600;
-  color: rgba(255,255,255,0.25);
-  letter-spacing: 0.8px; text-transform: uppercase;
-  padding: 10px 0 8px;
-}
-.mock-insp-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-}
-.mock-insp-dot {
-  width: 14px; height: 14px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
-}
-.mock-insp-dot.sel { border-color: #3b82f6; background: #3b82f6; }
-.mock-insp-text { font-size: 11px; color: rgba(255,255,255,0.65); }
-.mock-insp-sub { font-size: 9.5px; color: rgba(255,255,255,0.25); margin-top: 1px; }
-.mock-toggle {
-  width: 34px; height: 20px; border-radius: 10px;
-  margin-left: auto;
-}
-.mock-toggle.on { background: #3b82f6; }
-.mock-toggle.off { background: rgba(255,255,255,0.1); }
 
 @keyframes fadeUp {
   from { opacity:0; transform: translateY(24px); }
@@ -474,14 +355,7 @@ section { padding: 100px 32px; }
   background: radial-gradient(ellipse, rgba(59,130,246,0.12), transparent 70%);
   pointer-events: none;
 }
-.download-app-icon {
-  width: 100px; height: 100px;
-  background: linear-gradient(145deg, #1d4ed8, #4f46e5);
-  border-radius: 24px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 46px;
-  box-shadow: 0 24px 60px rgba(59,130,246,0.4);
-}
+
 .download-title { font-family: var(--serif); font-size: 36px; }
 .download-version { font-size: 13px; color: var(--text-3); }
 .download-btn {
@@ -625,9 +499,7 @@ footer {
 @media (max-width: 900px) {
   .feature-grid { grid-template-columns: 1fr 1fr; }
   .stats-grid   { grid-template-columns: 1fr 1fr; }
-  .mockup-body  { grid-template-columns: 1fr; }
-  .mock-inspector, .mock-sidebar { display: none; }
-  .nav-tabs { display: none; }
+  .mock-inspector,   .nav-tabs { display: none; }
   .req-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
@@ -644,7 +516,7 @@ footer {
 <nav>
   <div class="nav-inner">
     <div class="nav-logo">
-      <div class="nav-logo-icon">🍷</div>
+      <img src="assets/icon.png" style="width:28px;height:28px;border-radius:8px;object-fit:cover;" alt="Meridian" />
       Meridian
     </div>
     <div class="nav-tabs">
@@ -665,7 +537,6 @@ footer {
   <!-- Hero -->
   <section class="hero">
     <div class="hero-glow"></div>
-    <div class="hero-grain"></div>
 
     <div class="hero-badge">
       <span class="hero-badge-dot"></span>
@@ -693,97 +564,6 @@ footer {
 
     <p class="hero-meta">Free · macOS 13+ · Apple Silicon · No external dependencies</p>
 
-    <!-- App mockup -->
-    <div class="hero-mockup">
-      <div class="mockup-titlebar">
-        <div class="mock-dot" style="background:#ff5f57"></div>
-        <div class="mock-dot" style="background:#febc2e"></div>
-        <div class="mock-dot" style="background:#28c840"></div>
-      </div>
-      <div class="mockup-body">
-        <!-- Sidebar -->
-        <div class="mock-sidebar">
-          <div class="mock-home-row">
-            <div class="mock-home-icon">🏠</div>
-            <div>
-              <div class="mock-label">Home</div>
-              <div class="mock-sub">Overview</div>
-            </div>
-          </div>
-          <div style="margin-top:12px;margin-bottom:6px;padding:0 6px">
-            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:0.7px;text-transform:uppercase">Bottles</div>
-          </div>
-          <div class="mock-bottle-row">
-            <div class="mock-bottle-icon" style="background:rgba(59,130,246,0.18);color:#60a5fa">S</div>
-            <div><div class="mock-label">Steam</div><div class="mock-sub">d3dmetal · msync</div></div>
-          </div>
-          <div class="mock-bottle-row">
-            <div class="mock-bottle-icon" style="background:rgba(168,85,247,0.18);color:#c084fc">E</div>
-            <div><div class="mock-label">Epic Games</div><div class="mock-sub">dxvk · msync</div></div>
-          </div>
-          <div class="mock-bottle-row">
-            <div class="mock-bottle-icon" style="background:rgba(52,199,89,0.18);color:#4ade80">G</div>
-            <div><div class="mock-label">GOG Galaxy</div><div class="mock-sub">d3dmetal · msync</div></div>
-          </div>
-        </div>
-        <!-- Content -->
-        <div class="mock-content">
-          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.28);letter-spacing:0.7px;text-transform:uppercase">Steam</div>
-          <div class="mock-grid">
-            <div class="mock-app">
-              <div class="mock-app-icon" style="background:rgba(59,130,246,0.15)">🎮</div>
-              <div class="mock-app-label">CS2</div>
-            </div>
-            <div class="mock-app">
-              <div class="mock-app-icon" style="background:rgba(239,68,68,0.15)">⚔️</div>
-              <div class="mock-app-label">Elden Ring</div>
-            </div>
-            <div class="mock-app">
-              <div class="mock-app-icon" style="background:rgba(52,199,89,0.15)">🌿</div>
-              <div class="mock-app-label">Stardew</div>
-            </div>
-            <div class="mock-app">
-              <div class="mock-app-icon" style="background:rgba(251,191,36,0.15)">🏆</div>
-              <div class="mock-app-label">Hades</div>
-            </div>
-            <div class="mock-app">
-              <div class="mock-app-icon" style="background:rgba(168,85,247,0.15)">🚀</div>
-              <div class="mock-app-label">No Man's Sky</div>
-            </div>
-          </div>
-        </div>
-        <!-- Inspector -->
-        <div class="mock-inspector">
-          <div class="mock-insp-title">Graphics API</div>
-          <div class="mock-insp-row">
-            <div class="mock-insp-dot sel"></div>
-            <div><div class="mock-insp-text" style="color:rgba(255,255,255,0.9);font-weight:600">d3dmetal</div><div class="mock-insp-sub">Apple Metal</div></div>
-          </div>
-          <div class="mock-insp-row">
-            <div class="mock-insp-dot"></div>
-            <div><div class="mock-insp-text">DXVK</div><div class="mock-insp-sub">DX9/10/11 → Vulkan</div></div>
-          </div>
-          <div class="mock-insp-row">
-            <div class="mock-insp-dot"></div>
-            <div><div class="mock-insp-text">vkd3d-proton</div><div class="mock-insp-sub">DX12 → Vulkan</div></div>
-          </div>
-          <div class="mock-insp-title">Display</div>
-          <div class="mock-insp-row">
-            <div class="mock-insp-text" style="flex:1">Retina Mode</div>
-            <div class="mock-toggle on"></div>
-          </div>
-          <div class="mock-insp-row">
-            <div class="mock-insp-text" style="flex:1">DLSS / XeSS</div>
-            <div class="mock-toggle off"></div>
-          </div>
-          <div class="mock-insp-title">Sync</div>
-          <div style="display:flex;gap:6px;padding:8px 0">
-            <div style="flex:1;text-align:center;padding:5px;border-radius:7px;font-size:11px;background:rgba(59,130,246,0.2);color:#60a5fa;font-weight:600">msync</div>
-            <div style="flex:1;text-align:center;padding:5px;border-radius:7px;font-size:11px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">esync</div>
-          </div>
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- Stats strip -->
@@ -1016,7 +796,7 @@ footer {
 
       <div style="margin-top:48px" class="reveal reveal-d3">
         <div class="download-box">
-          <div class="download-app-icon">🍷</div>
+          <img src="assets/icon.png" style="width:100px;height:100px;border-radius:24px;object-fit:cover;box-shadow:0 24px 60px rgba(59,130,246,0.4);" alt="Meridian" />
           <div>
             <div class="download-title">Meridian</div>
             <div class="download-version">Version 1.0.0 · macOS 13.0+</div>
