@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="assets/icon.png" width="128" height="128" alt="Meridian icon" />
+  <img src="assets/icon.jpg" width="128" height="128" alt="Meridian icon" />
   <h1>Meridian</h1>
   <p><strong>Native macOS Wine launcher with a bundled runtime</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/macOS-13.0%2B-black?style=flat-square&logo=apple" />
+    <img src="https://img.shields.io/badge/macOS-15.0%2B-black?style=flat-square&logo=apple" />
     <img src="https://img.shields.io/badge/Apple_Silicon-Recommended-blue?style=flat-square" />
-    <img src="https://img.shields.io/badge/Swift-5.9-orange?style=flat-square&logo=swift" />
+    <img src="https://img.shields.io/badge/Swift-6.0-orange?style=flat-square&logo=swift" />
     <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" />
   </p>
 </div>
@@ -73,10 +73,10 @@ Meridian is a native **SwiftUI** app for running Windows applications and games 
 
 | | |
 |---|---|
-| macOS | 13.0 Ventura or later |
+| macOS | 15.0 Sequoia or later |
 | Architecture | Apple Silicon (M1 and later) recommended |
 | Disk space | ~2 GB for the bundled runtime |
-| External dependencies | None required. `icoutils` via Homebrew enables better icon extraction. |
+| External dependencies | None required. |
 
 ## Installation
 
@@ -113,8 +113,6 @@ Runtime/
 - **32-bit programs** — `WINEARCH=win64` is enforced; 32-bit-only executables will not run
 - **Anti-cheat** — games using kernel-level anti-cheat (Valorant, EasyAntiCheat on some titles) are not supported
 - **DLSS / XeSS** — experimental; results vary by game and driver version
-- **Localization** — a few secondary screens and service messages remain English-only in this release
-- **Controller support** and engine patch tooling are functional but not validated across a wide game matrix
 
 ## Acknowledgements
 
