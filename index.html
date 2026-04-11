@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meridian — Windows on Mac, beautifully.</title>
+<meta name="description" content="Meridian is a native macOS Wine launcher with a bundled runtime. Run Windows apps and games on Apple Silicon with no setup required." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #06060a;
+  --bg2:       #0d0d14;
+  --bg3:       #13131e;
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(255,255,255,0.13);
+  --text:      rgba(255,255,255,0.92);
+  --text-2:    rgba(255,255,255,0.52);
+  --text-3:    rgba(255,255,255,0.28);
+  --accent:    #3b82f6;
+  --accent-2:  #60a5fa;
+  --accent-glow: rgba(59,130,246,0.22);
+  --radius:    16px;
+  --nav-h:     60px;
+  --serif:     'Instrument Serif', Georgia, serif;
+  --sans:      'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+/* ── Nav ──────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 32px;
+  background: rgba(6,6,10,0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  width: 100%; max-width: 1100px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 16px; font-weight: 600; letter-spacing: -0.3px;
+}
+.nav-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.nav-tabs {
+  display: flex; align-items: center; gap: 2px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
+.nav-tab {
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: color 0.2s, background 0.2s;
+  cursor: pointer;
+}
+.nav-tab:hover { color: var(--text); }
+.nav-tab.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+}
+.nav-cta {
+  padding: 8px 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Pages ────────────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── Section shared ───────────────────────────────────────── */
+section { padding: 100px 32px; }
+.container { max-width: 1100px; margin: 0 auto; }
+.container-narrow { max-width: 760px; margin: 0 auto; }
+.section-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 1.6px;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.12;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.section-sub {
+  font-size: 17px; line-height: 1.65;
+  color: var(--text-2);
+  margin-top: 20px;
+  max-width: 580px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: calc(var(--nav-h) + 60px) 32px 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: 10%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.14), transparent 70%);
+  pointer-events: none;
+}
+.hero-grain {
+  position: absolute; inset: 0; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px 6px 8px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 500;
+  color: var(--accent-2);
+  margin-bottom: 32px;
+  animation: fadeUp 0.7s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(52px, 8vw, 96px);
+  line-height: 1.04;
+  letter-spacing: -2px;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+.hero-title em {
+  font-style: italic;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 19px; line-height: 1.6;
+  color: var(--text-2);
+  max-width: 520px;
+  margin: 28px auto 0;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+.hero-actions {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 44px;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+.btn-primary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 14px;
+  font-size: 15px; font-weight: 600;
+  transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+  box-shadow: 0 8px 30px rgba(59,130,246,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(59,130,246,0.45); }
+.btn-primary:active { transform: translateY(0); }
+.btn-ghost {
+  display: flex; align-items: center; gap: 6px;
+  padding: 14px 24px;
+  border: 1px solid var(--border-hi);
+  border-radius: 14px;
+  font-size: 15px; font-weight: 500;
+  color: var(--text-2);
+  transition: color 0.18s, border-color 0.18s, transform 0.18s;
+}
+.btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+.hero-meta {
+  margin-top: 28px;
+  font-size: 12.5px; color: var(--text-3);
+  animation: fadeUp 0.8s 0.4s ease both;
+}
+.hero-mockup {
+  margin-top: 80px;
+  width: 100%; max-width: 900px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 60px 120px rgba(0,0,0,0.7), 0 0 0 1px var(--border);
+  animation: fadeUp 1s 0.5s ease both;
+  position: relative;
+}
+.mockup-titlebar {
+  height: 44px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 16px; gap: 8px;
+}
+.mock-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mockup-body {
+  display: grid; grid-template-columns: 230px 1fr 265px;
+  height: 460px;
+}
+.mock-sidebar {
+  background: rgba(255,255,255,0.02);
+  border-right: 1px solid var(--border);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.mock-home-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+}
+.mock-home-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  background: rgba(59,130,246,0.2);
+}
+.mock-label { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.mock-sub { font-size: 10px; color: rgba(255,255,255,0.32); }
+.mock-bottle-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+}
+.mock-bottle-row:hover { background: rgba(255,255,255,0.04); }
+.mock-bottle-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700;
+}
+.mock-content {
+  padding: 32px 36px;
+  display: flex; flex-direction: column;
+  align-items: flex-start;
+}
+.mock-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  width: 100%;
+  margin-top: 24px;
+}
+.mock-app {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+}
+.mock-app-icon {
+  width: 72px; height: 72px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.mock-app-label {
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  text-align: center;
+}
+.mock-inspector {
+  background: rgba(255,255,255,0.025);
+  border-left: 1px solid var(--border);
+  padding: 20px 16px;
+  display: flex; flex-direction: column; gap: 0;
+}
+.mock-insp-title {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 10px 0 8px;
+}
+.mock-insp-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.mock-insp-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+.mock-insp-dot.sel { border-color: #3b82f6; background: #3b82f6; }
+.mock-insp-text { font-size: 11px; color: rgba(255,255,255,0.65); }
+.mock-insp-sub { font-size: 9.5px; color: rgba(255,255,255,0.25); margin-top: 1px; }
+.mock-toggle {
+  width: 34px; height: 20px; border-radius: 10px;
+  margin-left: auto;
+}
+.mock-toggle.on { background: #3b82f6; }
+.mock-toggle.off { background: rgba(255,255,255,0.1); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(24px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ── Stats strip ──────────────────────────────────────────── */
+.stats-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 32px;
+}
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 18px; overflow: hidden;
+}
+.stat-cell {
+  background: var(--bg);
+  padding: 32px 28px;
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 44px; line-height: 1;
+  color: var(--text);
+}
+.stat-num span { color: var(--accent); }
+.stat-label {
+  font-size: 13px; color: var(--text-3);
+  margin-top: 8px;
+}
+
+/* ── Features page ────────────────────────────────────────── */
+.features-hero {
+  padding: calc(var(--nav-h) + 80px) 32px 80px;
+  text-align: center;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+}
+.feature-card {
+  background: var(--bg);
+  padding: 36px 32px;
+  transition: background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.feature-card:hover { background: var(--bg2); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+.feature-name {
+  font-size: 16px; font-weight: 600; color: var(--text);
+  margin-bottom: 10px;
+}
+.feature-desc {
+  font-size: 14px; line-height: 1.65; color: var(--text-2);
+}
+.feature-tag {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  background: rgba(59,130,246,0.1);
+  color: var(--accent-2);
+  border: 1px solid rgba(59,130,246,0.18);
+}
+.feature-tag.new { background: rgba(52,199,89,0.1); color: #4ade80; border-color: rgba(52,199,89,0.2); }
+.feature-tag.exp { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.2); }
+
+/* Compatibility table */
+.compat-section { padding: 80px 32px; }
+.compat-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.compat-table th {
+  background: var(--bg2);
+  padding: 14px 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.6px;
+  text-transform: uppercase; color: var(--text-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compat-table td {
+  padding: 14px 20px;
+  font-size: 14px; color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+}
+.compat-table tr:last-child td { border-bottom: none; }
+.compat-table tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px; font-size: 12px; font-weight: 500;
+}
+.badge.green { background: rgba(52,199,89,0.1); color: #4ade80; }
+.badge.blue  { background: rgba(59,130,246,0.1); color: var(--accent-2); }
+.badge.amber { background: rgba(251,191,36,0.1); color: #fbbf24; }
+
+/* ── Download page ────────────────────────────────────────── */
+.download-hero {
+  padding: calc(var(--nav-h) + 80px) 32px 60px;
+  text-align: center;
+}
+.download-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 48px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 24px;
+  position: relative; overflow: hidden;
+}
+.download-box::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 400px; height: 200px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.12), transparent 70%);
+  pointer-events: none;
+}
+.download-app-icon {
+  width: 100px; height: 100px;
+  background: linear-gradient(145deg, #1d4ed8, #4f46e5);
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 46px;
+  box-shadow: 0 24px 60px rgba(59,130,246,0.4);
+}
+.download-title { font-family: var(--serif); font-size: 36px; }
+.download-version { font-size: 13px; color: var(--text-3); }
+.download-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 36px;
+  background: var(--accent);
+  color: #fff; border-radius: 14px;
+  font-size: 16px; font-weight: 600;
+  box-shadow: 0 8px 32px rgba(59,130,246,0.4);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.download-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 42px rgba(59,130,246,0.5); }
+.download-meta { font-size: 12.5px; color: var(--text-3); }
+
+.req-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  margin-top: 48px;
+}
+.req-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+}
+.req-card-title { font-size: 13px; font-weight: 600; color: var(--text-3); margin-bottom: 14px; letter-spacing: 0.5px; text-transform: uppercase; }
+.req-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+.req-row:last-child { border-bottom: none; }
+.req-key { font-size: 13px; color: var(--text-2); }
+.req-val { font-size: 13px; color: var(--text); text-align: right; }
+
+.steps {
+  margin-top: 64px;
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 18px; overflow: hidden;
+}
+.step {
+  display: flex; align-items: flex-start; gap: 20px;
+  padding: 28px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  transition: background 0.2s;
+}
+.step:last-child { border-bottom: none; }
+.step:hover { background: var(--bg2); }
+.step-num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  color: var(--accent-2);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-title { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+.step-desc  { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.88em;
+  background: rgba(255,255,255,0.07);
+  padding: 2px 7px; border-radius: 5px;
+  color: var(--accent-2);
+}
+
+/* ── Changelog page ───────────────────────────────────────── */
+.changelog-hero {
+  padding: calc(var(--nav-h) + 80px) 32px 60px;
+}
+.changelog-entry { padding: 0 0 64px; }
+.changelog-version {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 32px;
+}
+.changelog-v-badge {
+  font-family: var(--serif);
+  font-size: 28px; color: var(--text);
+}
+.changelog-date {
+  font-size: 13px; color: var(--text-3);
+  padding: 4px 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.changelog-initial {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px;
+  background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--accent-2);
+}
+.cl-section { margin-top: 28px; }
+.cl-section-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text-3);
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.cl-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+.cl-list li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 14px; line-height: 1.6; color: var(--text-2);
+}
+.cl-list li:last-child { border-bottom: none; }
+.cl-bullet {
+  flex-shrink: 0; margin-top: 7px;
+  width: 5px; height: 5px; border-radius: 50%;
+}
+.cl-bullet.add  { background: #4ade80; }
+.cl-bullet.fix  { background: #f87171; }
+.cl-bullet.impr { background: var(--accent-2); }
+
+/* ── Footer ───────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 32px;
+  text-align: center;
+}
+.footer-inner { max-width: 1100px; margin: 0 auto; }
+.footer-logo { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 8px; }
+.footer-links { display: flex; align-items: center; justify-content: center; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+.footer-links a { font-size: 13px; color: var(--text-3); transition: color 0.2s; }
+.footer-links a:hover { color: var(--text-2); }
+.footer-copy { font-size: 12px; color: var(--text-3); }
+
+/* ── Scroll reveal ────────────────────────────────────────── */
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.08s; }
+.reveal-d2 { transition-delay: 0.16s; }
+.reveal-d3 { transition-delay: 0.24s; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+  .stats-grid   { grid-template-columns: 1fr 1fr; }
+  .mockup-body  { grid-template-columns: 1fr; }
+  .mock-inspector, .mock-sidebar { display: none; }
+  .nav-tabs { display: none; }
+  .req-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .feature-grid { grid-template-columns: 1fr; }
+  .stats-grid   { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">🍷</div>
+      Meridian
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-page="home">Home</button>
+      <button class="nav-tab" data-page="features">Features</button>
+      <button class="nav-tab" data-page="download">Download</button>
+      <button class="nav-tab" data-page="changelog">What's New</button>
+    </div>
+    <a href="#" class="nav-cta" onclick="switchPage('download');return false;">Download Free</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: HOME
+═══════════════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-grain"></div>
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Version 1.0 — Now Available
+    </div>
+
+    <h1 class="hero-title">
+      Windows on Mac,<br><em>beautifully.</em>
+    </h1>
+
+    <p class="hero-sub">
+      Meridian is a native macOS Wine launcher with a fully bundled runtime.
+      No Terminal. No Homebrew. No compromise.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn-primary" onclick="switchPage('download');return false;">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        Download for macOS
+      </a>
+      <a href="#" class="btn-ghost" onclick="switchPage('features');return false;">
+        Explore Features →
+      </a>
+    </div>
+
+    <p class="hero-meta">Free · macOS 13+ · Apple Silicon · No external dependencies</p>
+
+    <!-- App mockup -->
+    <div class="hero-mockup">
+      <div class="mockup-titlebar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#febc2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+      </div>
+      <div class="mockup-body">
+        <!-- Sidebar -->
+        <div class="mock-sidebar">
+          <div class="mock-home-row">
+            <div class="mock-home-icon">🏠</div>
+            <div>
+              <div class="mock-label">Home</div>
+              <div class="mock-sub">Overview</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;margin-bottom:6px;padding:0 6px">
+            <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:0.7px;text-transform:uppercase">Bottles</div>
+          </div>
+          <div class="mock-bottle-row">
+            <div class="mock-bottle-icon" style="background:rgba(59,130,246,0.18);color:#60a5fa">S</div>
+            <div><div class="mock-label">Steam</div><div class="mock-sub">d3dmetal · msync</div></div>
+          </div>
+          <div class="mock-bottle-row">
+            <div class="mock-bottle-icon" style="background:rgba(168,85,247,0.18);color:#c084fc">E</div>
+            <div><div class="mock-label">Epic Games</div><div class="mock-sub">dxvk · msync</div></div>
+          </div>
+          <div class="mock-bottle-row">
+            <div class="mock-bottle-icon" style="background:rgba(52,199,89,0.18);color:#4ade80">G</div>
+            <div><div class="mock-label">GOG Galaxy</div><div class="mock-sub">d3dmetal · msync</div></div>
+          </div>
+        </div>
+        <!-- Content -->
+        <div class="mock-content">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.28);letter-spacing:0.7px;text-transform:uppercase">Steam</div>
+          <div class="mock-grid">
+            <div class="mock-app">
+              <div class="mock-app-icon" style="background:rgba(59,130,246,0.15)">🎮</div>
+              <div class="mock-app-label">CS2</div>
+            </div>
+            <div class="mock-app">
+              <div class="mock-app-icon" style="background:rgba(239,68,68,0.15)">⚔️</div>
+              <div class="mock-app-label">Elden Ring</div>
+            </div>
+            <div class="mock-app">
+              <div class="mock-app-icon" style="background:rgba(52,199,89,0.15)">🌿</div>
+              <div class="mock-app-label">Stardew</div>
+            </div>
+            <div class="mock-app">
+              <div class="mock-app-icon" style="background:rgba(251,191,36,0.15)">🏆</div>
+              <div class="mock-app-label">Hades</div>
+            </div>
+            <div class="mock-app">
+              <div class="mock-app-icon" style="background:rgba(168,85,247,0.15)">🚀</div>
+              <div class="mock-app-label">No Man's Sky</div>
+            </div>
+          </div>
+        </div>
+        <!-- Inspector -->
+        <div class="mock-inspector">
+          <div class="mock-insp-title">Graphics API</div>
+          <div class="mock-insp-row">
+            <div class="mock-insp-dot sel"></div>
+            <div><div class="mock-insp-text" style="color:rgba(255,255,255,0.9);font-weight:600">d3dmetal</div><div class="mock-insp-sub">Apple Metal</div></div>
+          </div>
+          <div class="mock-insp-row">
+            <div class="mock-insp-dot"></div>
+            <div><div class="mock-insp-text">DXVK</div><div class="mock-insp-sub">DX9/10/11 → Vulkan</div></div>
+          </div>
+          <div class="mock-insp-row">
+            <div class="mock-insp-dot"></div>
+            <div><div class="mock-insp-text">vkd3d-proton</div><div class="mock-insp-sub">DX12 → Vulkan</div></div>
+          </div>
+          <div class="mock-insp-title">Display</div>
+          <div class="mock-insp-row">
+            <div class="mock-insp-text" style="flex:1">Retina Mode</div>
+            <div class="mock-toggle on"></div>
+          </div>
+          <div class="mock-insp-row">
+            <div class="mock-insp-text" style="flex:1">DLSS / XeSS</div>
+            <div class="mock-toggle off"></div>
+          </div>
+          <div class="mock-insp-title">Sync</div>
+          <div style="display:flex;gap:6px;padding:8px 0">
+            <div style="flex:1;text-align:center;padding:5px;border-radius:7px;font-size:11px;background:rgba(59,130,246,0.2);color:#60a5fa;font-weight:600">msync</div>
+            <div style="flex:1;text-align:center;padding:5px;border-radius:7px;font-size:11px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">esync</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-cell reveal">
+          <div class="stat-num">0<span>kb</span></div>
+          <div class="stat-label">External dependencies required</div>
+        </div>
+        <div class="stat-cell reveal reveal-d1">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Graphics backends — D3DMetal, DXVK, vkd3d</div>
+        </div>
+        <div class="stat-cell reveal reveal-d2">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Wine bottles, each isolated by UUID prefix</div>
+        </div>
+        <div class="stat-cell reveal reveal-d3">
+          <div class="stat-num">1<span>.0</span></div>
+          <div class="stat-label">Native SwiftUI — no Electron, no web views</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Why Meridian -->
+  <section style="padding:100px 32px">
+    <div class="container-narrow">
+      <div class="section-eyebrow reveal">Why Meridian</div>
+      <h2 class="section-title reveal reveal-d1">Built for Apple Silicon.<br>Not ported.</h2>
+      <p class="section-sub reveal reveal-d2">
+        Meridian is written entirely in Swift and SwiftUI. It uses native macOS APIs for everything — notifications, menu bar, process management, file system. The result is an app that feels like it belongs on your Mac, because it does.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Meridian</div>
+      <div class="footer-links">
+        <a href="#" onclick="switchPage('features');return false">Features</a>
+        <a href="#" onclick="switchPage('download');return false">Download</a>
+        <a href="#" onclick="switchPage('changelog');return false">Changelog</a>
+        <a href="https://github.com" target="_blank">GitHub</a>
+        <a href="#">License</a>
+      </div>
+      <div class="footer-copy">© 2025 Meridian. Free and open source.</div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: FEATURES
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-features">
+
+  <section class="features-hero">
+    <div class="section-eyebrow reveal">Features</div>
+    <h1 class="section-title reveal reveal-d1">Everything you need.<br>Nothing you don't.</h1>
+    <p class="section-sub reveal reveal-d2" style="margin:20px auto 0">
+      Meridian ships a complete, curated toolchain for running Windows software on Apple Silicon. No configuration required — but everything is configurable.
+    </p>
+  </section>
+
+  <section style="padding:0 32px 80px">
+    <div class="container">
+      <div class="feature-grid">
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🍷</div>
+          <div class="feature-name">Bottle Management</div>
+          <div class="feature-desc">Create isolated Wine environments per game or app. Each bottle gets its own UUID-based prefix, icon, color, and settings. Export and import as <code>.bottle.zip</code>.</div>
+          <span class="feature-tag">Core</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-name">Bundled Runtime</div>
+          <div class="feature-desc">Wine, DXVK, vkd3d-proton, D3DMetal, GStreamer — all inside the <code>.app</code> bundle. Zero external installs. Works on a clean macOS system out of the box.</div>
+          <span class="feature-tag new">No setup</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon">🎨</div>
+          <div class="feature-name">Graphics Backends</div>
+          <div class="feature-desc">Switch between D3DMetal (Apple Metal native), DXVK (DX9/10/11), and vkd3d-proton (DX12) per bottle. DLL overrides and wineserver restart happen automatically.</div>
+          <span class="feature-tag">Graphics</span>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🚀</div>
+          <div class="feature-name">Launchpad Grid</div>
+          <div class="feature-desc">Programs are shown as a 96 px icon grid — real icons extracted from <code>.exe</code> PE headers. Single click to select, double click to launch. Drag <code>.exe</code> to drop-install.</div>
+          <span class="feature-tag">UI</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon">📦</div>
+          <div class="feature-name">App Library</div>
+          <div class="feature-desc">Built-in catalog of popular launchers, Windows runtimes, browsers, and tools. Downloads are cached locally — no re-download if you reinstall.</div>
+          <span class="feature-tag new">New</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon">🔍</div>
+          <div class="feature-name">Program Scanner</div>
+          <div class="feature-desc">Auto-scans <code>drive_c/Program Files</code> after installation. Filters system executables and helpers by size and name, then presents found apps for one-click import.</div>
+          <span class="feature-tag">Automation</span>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">📊</div>
+          <div class="feature-name">Process Monitor</div>
+          <div class="feature-desc">Live Wine process list refreshed every 2 seconds. Shows CPU%, RSS memory, and PID for each process. Kill individual processes or wipe all Wine processes at once.</div>
+          <span class="feature-tag">Diagnostics</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon">🎛️</div>
+          <div class="feature-name">Per-Bottle Inspector</div>
+          <div class="feature-desc">A fixed right-panel inspector shows settings for the active bottle — Graphics API, Retina Mode, Sync Method, custom ENV vars, disk usage, and debug tools. Always visible, never a sheet.</div>
+          <span class="feature-tag">UI</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon">🔔</div>
+          <div class="feature-name">Menu Bar & Notifications</div>
+          <div class="feature-desc">A status bar icon shows all your bottles and pinned programs. OS notifications fire when installs complete or bottles are ready. Works while the main window is closed.</div>
+          <span class="feature-tag">macOS</span>
+        </div>
+
+        <div class="feature-card reveal">
+          <div class="feature-icon">🖥️</div>
+          <div class="feature-name">Retina Mode</div>
+          <div class="feature-desc">Writes <code>RetinaMode = Y</code> to the Wine registry and restarts wineserver so the change takes effect immediately — no bottle restart needed.</div>
+          <span class="feature-tag">Display</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d1">
+          <div class="feature-icon">🔧</div>
+          <div class="feature-name">Environment Variables</div>
+          <div class="feature-desc">Add, edit, and remove per-bottle <code>KEY=value</code> pairs that are merged into Wine's environment at launch time. Override any built-in variable without touching source code.</div>
+          <span class="feature-tag">Advanced</span>
+        </div>
+
+        <div class="feature-card reveal reveal-d2">
+          <div class="feature-icon">🧪</div>
+          <div class="feature-name">DLSS / XeSS</div>
+          <div class="feature-desc">Experimental upscaling hook via <code>WINE_ALLOW_XR_UPSCALING</code>. Results vary by game. Use with D3DMetal for best results on Apple Silicon.</div>
+          <span class="feature-tag exp">Experimental</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Compat table -->
+  <section class="compat-section">
+    <div class="container">
+      <div class="section-eyebrow reveal">Compatibility</div>
+      <h2 class="section-title reveal reveal-d1" style="font-size:36px;margin-bottom:32px">Graphics API reference</h2>
+      <table class="compat-table reveal reveal-d2">
+        <thead>
+          <tr>
+            <th>Backend</th>
+            <th>DirectX Support</th>
+            <th>Apple Silicon</th>
+            <th>Best For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>D3DMetal</strong> <em style="color:var(--text-3);font-style:normal;font-size:12px">Default</em></td>
+            <td>DX9 – DX12 via Metal</td>
+            <td><span class="badge green">✓ Recommended</span></td>
+            <td>Modern games, Apple Silicon native path</td>
+          </tr>
+          <tr>
+            <td><strong>DXVK 2.x</strong></td>
+            <td>DX9, DX10, DX11 → Vulkan</td>
+            <td><span class="badge blue">✓ Supported</span></td>
+            <td>Older titles, broad DX9–11 compatibility</td>
+          </tr>
+          <tr>
+            <td><strong>vkd3d-proton</strong></td>
+            <td>DX12 → Vulkan</td>
+            <td><span class="badge blue">✓ Supported</span></td>
+            <td>DX12-only games (Valve fork)</td>
+          </tr>
+          <tr>
+            <td><strong>DLSS / XeSS</strong></td>
+            <td>Via upscaling hook</td>
+            <td><span class="badge amber">⚠ Experimental</span></td>
+            <td>Performance upscaling — varies by game</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Meridian</div>
+      <div class="footer-links">
+        <a href="#" onclick="switchPage('home');return false">Home</a>
+        <a href="#" onclick="switchPage('download');return false">Download</a>
+        <a href="#" onclick="switchPage('changelog');return false">Changelog</a>
+        <a href="https://github.com" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">© 2025 Meridian. Free and open source.</div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: DOWNLOAD
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-download">
+
+  <section class="download-hero">
+    <div class="container-narrow">
+      <div class="section-eyebrow reveal">Download</div>
+      <h1 class="section-title reveal reveal-d1">Get Meridian</h1>
+      <p class="section-sub reveal reveal-d2" style="margin:20px auto 0">
+        One download. No Terminal. No package manager. Drag to Applications and you're ready.
+      </p>
+
+      <div style="margin-top:48px" class="reveal reveal-d3">
+        <div class="download-box">
+          <div class="download-app-icon">🍷</div>
+          <div>
+            <div class="download-title">Meridian</div>
+            <div class="download-version">Version 1.0.0 · macOS 13.0+</div>
+          </div>
+          <a href="#" class="download-btn">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            Download — Free
+          </a>
+          <div class="download-meta">Meridian.dmg · ~280 MB · Runtime included</div>
+        </div>
+      </div>
+
+      <div class="req-grid reveal">
+        <div class="req-card">
+          <div class="req-card-title">System Requirements</div>
+          <div class="req-row">
+            <span class="req-key">macOS</span>
+            <span class="req-val">13.0 Ventura or later</span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">Chip</span>
+            <span class="req-val">Apple Silicon (M1+) recommended</span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">RAM</span>
+            <span class="req-val">8 GB minimum, 16 GB recommended</span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">Storage</span>
+            <span class="req-val">~2 GB for app + runtime</span>
+          </div>
+        </div>
+        <div class="req-card">
+          <div class="req-card-title">Optional Extras</div>
+          <div class="req-row">
+            <span class="req-key">icoutils</span>
+            <span class="req-val">Better icon extraction from <code>.exe</code></span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">Homebrew</span>
+            <span class="req-val">To install <code>icoutils</code></span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">Intel Mac</span>
+            <span class="req-val">Supported, not optimised</span>
+          </div>
+          <div class="req-row">
+            <span class="req-key">Dependencies</span>
+            <span class="req-val" style="color:#4ade80">None required</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <div class="step-title">Download the DMG</div>
+            <div class="step-desc">Click the button above. The download includes Meridian and the full bundled runtime — Wine, DXVK, vkd3d-proton, D3DMetal, and GStreamer.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <div class="step-title">Drag to Applications</div>
+            <div class="step-desc">Open the DMG and drag <code>Meridian.app</code> to your Applications folder, just like any other Mac app.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <div class="step-title">Complete the Onboarding</div>
+            <div class="step-desc">On first launch, Meridian verifies the bundled runtime and walks you through creating your first Wine bottle with optimal settings applied automatically.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div>
+            <div class="step-title">Install your first app</div>
+            <div class="step-desc">Use the App Library to browse popular launchers and tools, or drag any <code>.exe</code> file directly onto a bottle to install and launch it.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Meridian</div>
+      <div class="footer-links">
+        <a href="#" onclick="switchPage('home');return false">Home</a>
+        <a href="#" onclick="switchPage('features');return false">Features</a>
+        <a href="#" onclick="switchPage('changelog');return false">Changelog</a>
+        <a href="https://github.com" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">© 2025 Meridian. Free and open source.</div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAGE: CHANGELOG
+═══════════════════════════════════════════════════════════ -->
+<div class="page" id="page-changelog">
+
+  <section class="changelog-hero">
+    <div class="container-narrow">
+      <div class="section-eyebrow reveal">What's New</div>
+      <h1 class="section-title reveal reveal-d1">Release Notes</h1>
+      <p class="section-sub reveal reveal-d2">
+        Every change to Meridian, documented in full.
+      </p>
+    </div>
+  </section>
+
+  <section style="padding:0 32px 120px">
+    <div class="container-narrow">
+
+      <div class="changelog-entry reveal">
+        <div class="changelog-version">
+          <span class="changelog-v-badge">1.0.0</span>
+          <span class="changelog-date">2025</span>
+          <span class="changelog-initial">First public release</span>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — Core</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>Native SwiftUI app targeting macOS 13+ on Apple Silicon with three-column <code>NavigationSplitView</code> layout</li>
+            <li><span class="cl-bullet add"></span>Complete Wine runtime bundled inside <code>Meridian.app</code> — no external install required. Includes Wine, DXVK, vkd3d-proton, D3DMetal, GStreamer, and supporting libraries</li>
+            <li><span class="cl-bullet add"></span>Accent color picker in Preferences — eight presets applied app-wide in real time via <code>AccentColorManager</code></li>
+            <li><span class="cl-bullet add"></span>Onboarding wizard on first launch: runtime check, first bottle creation, and feature overview with animated steps</li>
+            <li><span class="cl-bullet add"></span>Home dashboard showing bottle count, program count, total launches, recent activity, and quick actions</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — Bottles</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>Create, rename, export, and import Wine bottles. Per-bottle UUID prefix stored in <code>~/Library/Application Support/Meridian/Bottles/</code></li>
+            <li><span class="cl-bullet add"></span>Per-bottle icon picker: 32 quick-emoji, custom emoji field, and 8 color presets for the icon background</li>
+            <li><span class="cl-bullet add"></span>Automatic <code>wineboot --init</code> on creation with D3DMetal, msync, and Retina Mode applied as defaults</li>
+            <li><span class="cl-bullet add"></span>Bottle scanner: auto-detects installed programs in <code>drive_c/Program Files</code>, filters system executables by name and file size</li>
+            <li><span class="cl-bullet add"></span>Export bottles as <code>.bottle.zip</code>; import restores the prefix and registers the bottle immediately</li>
+            <li><span class="cl-bullet add"></span>Disk usage reported per bottle via async <code>FileManager</code> enumeration</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — Graphics & Compatibility</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>D3DMetal backend via <code>DYLD_LIBRARY_PATH</code> pointing to <code>lib/external/</code> and <code>WINEDLLOVERRIDES</code></li>
+            <li><span class="cl-bullet add"></span>DXVK 2.x backend — DLLs copied into <code>system32</code> / <code>syswow64</code> on selection, removed automatically when switching away</li>
+            <li><span class="cl-bullet add"></span>vkd3d-proton backend with mirrored DLL management</li>
+            <li><span class="cl-bullet add"></span>msync and esync toggled via <code>WINEMSYNC</code> / <code>WINEESYNC</code></li>
+            <li><span class="cl-bullet add"></span>Retina Mode written to <code>HKCU\Software\Wine\Mac Driver</code> via <code>wine reg add</code> and applied live</li>
+            <li><span class="cl-bullet add"></span>Experimental DLSS / XeSS hook via <code>WINE_ALLOW_XR_UPSCALING</code></li>
+            <li><span class="cl-bullet add"></span><code>wineserver -k</code> issued automatically on any graphics setting change</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — Programs</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>Launchpad-style 96 px program grid with spring selection animation; single click selects, double click launches</li>
+            <li><span class="cl-bullet add"></span>Real icon extraction from Windows <code>.exe</code> PE resource section — Strategy A via Homebrew <code>icoutils</code>, Strategy B via native Swift PE parser</li>
+            <li><span class="cl-bullet add"></span>Icon cache at <code>~/Library/Application Support/Meridian/Icons/</code> keyed by exe path hash</li>
+            <li><span class="cl-bullet add"></span>Launch history with relative timestamps, stored per bottle, capped at 50 entries</li>
+            <li><span class="cl-bullet add"></span>Inline rename via double-click; remove from list without deleting the file on disk</li>
+            <li><span class="cl-bullet add"></span>Drag-and-drop <code>.exe</code> onto the grid to launch and register in one step</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — App Library & Downloads</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>Built-in catalog across 8 categories: Launchers, Runtimes, Tools, Creative, Browsers, Social, Dev, Media</li>
+            <li><span class="cl-bullet add"></span>Installer cache at <code>~/Library/Application Support/Meridian/Installers/</code> — cached installers show "Open" instead of "Download"</li>
+            <li><span class="cl-bullet add"></span>Download sheet with circular progress ring, download speed (MB/s), ETA, linear progress bar, and live Wine install log</li>
+            <li><span class="cl-bullet add"></span>Cancel download or abort installation mid-way; <code>wineserver -k</code> cleans up all child installer processes</li>
+            <li><span class="cl-bullet add"></span><code>wineserver -w</code> used in install flow to detect true completion including child installer windows</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Added — macOS Integration</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet add"></span>Menu bar status item with per-bottle program submenus, Kill Wineserver, Kill All, and open main window</li>
+            <li><span class="cl-bullet add"></span>OS notifications for bottle ready and install complete / failed via <code>UserNotifications</code></li>
+            <li><span class="cl-bullet add"></span>Process Monitor — live Wine process list, 2-second refresh, with per-process CPU%, RSS, and kill</li>
+            <li><span class="cl-bullet add"></span>Export / import via <code>NSSavePanel</code> / <code>NSOpenPanel</code> with <code>zip</code> and <code>unzip</code></li>
+            <li><span class="cl-bullet add"></span>Per-bottle custom environment variables added inline (KEY = value) and merged at launch time</li>
+          </ul>
+        </div>
+
+        <div class="cl-section">
+          <div class="cl-section-title">Fixed</div>
+          <ul class="cl-list">
+            <li><span class="cl-bullet fix"></span><code>Pipe()</code> without a reader blocked Wine when output exceeded the ~65 KB kernel buffer — replaced with <code>/dev/null</code> redirect for <code>wineboot</code>, <code>wineserver -k</code>, and <code>reg add</code></li>
+            <li><span class="cl-bullet fix"></span><code>Binding&lt;Bottle&gt;</code> captured index at creation — array mutation after deletion caused <code>Index out of range</code> crash; fixed to search by <code>id</code> on every access</li>
+            <li><span class="cl-bullet fix"></span>Bottle prefix path saved before <code>removeAll</code> — file deletion now uses the correct path even after the bottle is removed from the array</li>
+            <li><span class="cl-bullet fix"></span>Context menu deletion left the prefix on disk — <code>wineserver -k</code> now runs synchronously before file removal with a one-second retry on failure</li>
+            <li><span class="cl-bullet fix"></span><code>wineboot --init</code> ran on every app launch — now skipped when <code>drive_c</code> already exists</li>
+            <li><span class="cl-bullet fix"></span>Orphaned prefixes on disk (without a matching JSON entry) are now recovered automatically at startup</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Meridian</div>
+      <div class="footer-links">
+        <a href="#" onclick="switchPage('home');return false">Home</a>
+        <a href="#" onclick="switchPage('features');return false">Features</a>
+        <a href="#" onclick="switchPage('download');return false">Download</a>
+        <a href="https://github.com" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-copy">© 2025 Meridian. Free and open source.</div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ── Navigation ─────────────────────────────────────────────── */
+function switchPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelector(`[data-page="${id}"]`).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  observeReveal();
+}
+
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+
+/* ── Scroll reveal ──────────────────────────────────────────── */
+function observeReveal() {
+  const els = document.querySelectorAll('.page.active .reveal:not(.visible)');
+  if (!('IntersectionObserver' in window)) {
+    els.forEach(el => el.classList.add('visible')); return;
+  }
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  els.forEach(el => io.observe(el));
+}
+
+window.addEventListener('DOMContentLoaded', observeReveal);
+window.addEventListener('scroll', () => {
+  const els = document.querySelectorAll('.page.active .reveal:not(.visible)');
+  if (els.length === 0) return;
+}, { passive: true });
+observeReveal();
+</script>
+
+</body>
+</html>
